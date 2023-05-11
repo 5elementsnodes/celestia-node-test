@@ -107,6 +107,6 @@ else:
 print(f"\nTest time: {round((end - start), 2)} s")
 print(f"Number of calls: {num_calls}")
 print(f"Number of requests/sec: {num_calls / (end - start):.2f}")
-print(f"Endpoint API latency: {latency_display} {latency_unit}")
+print(f"Average API latency: {latency_display} {latency_unit}")
 print(f"Total errors: {total_errors}")
 print(f"Total timeouts: {total_timeouts}")
