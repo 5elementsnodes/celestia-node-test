@@ -13,6 +13,7 @@ pip install requests
 ## Usage
 
 To use the script, simply run it from the command line and provide the endpoint URL and the authorization token using the `-a` or `--auth` flag. You can also specify the number of requests to make using the `-c` or `--calls` flag, the number of threads to use using the `-t` or `--threads` flag, and the number of times to retry failed requests using the `-r` or `--retry` flag.
+Note: This tool is structured to make an RPC call. Celestia nodes uses port 26658 by default.
 
 ```
 python api_request_tester.py <endpoint> -a <auth_token> [-c <num_calls>] [-t <num_threads>] [-r <retry_count>]
@@ -24,6 +25,9 @@ Here's an example command that tests an API endpoint with 500 requests using 20 
 
 ```
 python api_request_tester.py https://example.com/api -a abcdef123456 -c 500 -t 20 -r 3
+```
+```
+python api_request_tester.py IP:26658 -a abcdef123456 -c 500 -t 20 -r 3
 ```
 
 ## Flags
