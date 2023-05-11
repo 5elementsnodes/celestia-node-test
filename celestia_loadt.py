@@ -38,7 +38,7 @@ def make_request(i, stop_event):
             response = requests.post(args.endpoint,
                                      headers=headers,
                                      json={'jsonrpc': '2.0', 'method': 'header.LocalHead', 'params': [], 'id': 1},
-                                     timeout=2)
+                                     timeout=5)
             end_time = time.monotonic()
             response.raise_for_status()
             data = response.json()
@@ -54,26 +54,37 @@ def make_request(i, stop_event):
                 return None, None, e
             else:
                 attempt += 1
-                time.sleep(3)
+                time.sleep(1)
+                if isinstance(e, requests.exceptions.ReadTimeout):
+                    return None, None, e
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
     futures = [executor.submit(make_request, i, threading.Event()) for i in range(num_calls)]
 
     for i, future in enumerate(concurrent.futures.as_completed(futures)):
-        time_total, latency, error = future.result()
-        if time_total:
-            total_time += time_total
-            total_latency += latency
-            if time_total >= 2000:
-                total_timeouts += 1
-                print("Timeout error: waited for 2 seconds.")
-        if error:
-            print(f"Error: {error}")
-            total_errors += 1
+        try:
+            time_total, latency, error = future.result(timeout=5)
+            if time_total:
+                total_time += time_total
+                total_latency += latency
+                if time_total >= 2000:
+                    total_timeouts += 1
+                    print("Timeout error: waited for 5 seconds.")
+            if error:
+                print(f"Error: {error}")
+                total_errors += 1
 
-        progress = (i + 1) / num_calls * 100
-        sys.stdout.write(f"\rProgress: {progress:.1f}%")
-        sys.stdout.flush()
+            progress = (i + 1) / num_calls * 100
+            sys.stdout.write(f"\rProgress: {progress:.1f}%")
+            sys.stdout.flush()
+        except requests.exceptions.ReadTimeout:
+            print("\nTimeout error: read timed out.")
+        except concurrent.futures.TimeoutError:
+            print("Timeout error: waited for 5 seconds.")
+            total_timeouts += 1
+        except Exception as e:
+            print(f"Error: {e}")
+            total_errors += 1
 
         if error and error.response.status_code == 401:
             print("\nStopping execution due to unauthorized Auth Token")
@@ -81,6 +92,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
                 future.cancel()
             executor.shutdown(wait=False)
             break
+
 
 end = time.monotonic()
 
@@ -94,7 +106,7 @@ else:
 
 print(f"\nTest time: {round((end - start), 2)} s")
 print(f"Number of calls: {num_calls}")
-print(f"Average time per call: {total_time / num_calls:.2f} ms")
+print(f"Number of requests/sec: {num_calls / (end - start):.2f}")
 print(f"Endpoint API latency: {latency_display} {latency_unit}")
 print(f"Total errors: {total_errors}")
 print(f"Total timeouts: {total_timeouts}")
