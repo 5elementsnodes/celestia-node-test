@@ -28,7 +28,7 @@ Here's an example command that tests an API endpoint with 500 requests using 20 
 python api_request_tester.py https://example.com/api -a abcdef123456 -c 500 -t 20 -r 3
 ```
 ```
-python api_request_tester.py IP:26658 -a abcdef123456 -c 500 -t 20 -r 3
+python api_request_tester.py http://IP:26658 -a abcdef123456 -c 500 -t 20 -r 3
 ```
 
 ## Flags
