@@ -1,4 +1,4 @@
-# Celestia Test Tools - Load 
+# Celestia Node Test Tools - Load 
 
 This script allows you to test the performance of an API endpoint by making multiple requests to it and measuring the response time, latency, and number of errors and timeouts. It uses the `requests` library to make HTTP requests, and `concurrent.futures` to run multiple requests in parallel using multiple threads.
 
